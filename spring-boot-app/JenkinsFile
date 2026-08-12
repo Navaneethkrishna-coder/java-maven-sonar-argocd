@@ -9,7 +9,7 @@ pipeline {
     DOCKER_IMAGE   = "dockernavaneeth/spring-boot-app"
     GIT_REPO_NAME  = "java-maven-sonar-argocd"
     GIT_USER_NAME  = "Navaneethkrishna-coder"
-    APP_DIR        = "java-maven-sonar-argocd-helm-k8s/spring-boot-app"
+    APP_DIR        = "spring-boot-app"
   }
   options {
     timeout(time: 30, unit: 'MINUTES')
@@ -30,18 +30,18 @@ pipeline {
       }
     }
     stage('SonarQube Analysis') {
-    steps {
-        withSonarQubeEnv('sonarqube') {
+      steps {
+        dir("${APP_DIR}") {
+          withSonarQubeEnv('sonarqube') {
             sh '''
-                cd spring-boot-app
-                mvn org.sonarsource.scanner.maven:sonar-maven-plugin:5.1.0.4751:sonar \
-                  -Dsonar.projectKey=my-ec2-project \
-                  -Dsonar.projectName="Spring Boot App" \
-                  -Dsonar.host.url=$SONAR_HOST_URL
+              mvn sonar:sonar \
+                -Dsonar.projectKey=spring-boot-app \
+                -Dsonar.projectName='Spring Boot App'
             '''
+          }
         }
+      }
     }
-}
     stage('Build and Push Docker Image') {
       steps {
         dir("${APP_DIR}") {
@@ -62,8 +62,8 @@ pipeline {
           sh '''
             git config user.email "navaneethkrishna008@gmail.com"
             git config user.name "${GIT_USER_NAME}"
-            sed -i "s|image: .*|image: ${DOCKER_IMAGE}:${BUILD_NUMBER}|g" k8s/deployment.yml
-            git add k8s/deployment.yml
+            sed -i "s|image: .*|image: ${DOCKER_IMAGE}:${BUILD_NUMBER}|g" spring-boot-app-manifests/deployment.yaml
+            git add spring-boot-app-manifests/deployment.yaml
             git commit -m "Update spring-boot app image to ${BUILD_NUMBER} [skip ci]" || echo "No changes to commit"
             git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME}.git HEAD:main
           '''
