@@ -30,18 +30,18 @@ pipeline {
       }
     }
     stage('SonarQube Analysis') {
-      steps {
-        dir("${APP_DIR}") {
-          withSonarQubeEnv('sonarqube') {
+    steps {
+        withSonarQubeEnv('sonarqube') {
             sh '''
-              mvn sonar:sonar \
-                -Dsonar.projectKey=spring-boot-app \
-                -Dsonar.projectName='Spring Boot App'
+                cd spring-boot-app
+                mvn sonar:sonar \
+                  -Dsonar.projectKey=my-ec2-project \
+                  -Dsonar.projectName="Spring Boot App" \
+                  -Dsonar.host.url=$SONAR_HOST_URL
             '''
-          }
         }
-      }
     }
+}
     stage('Build and Push Docker Image') {
       steps {
         dir("${APP_DIR}") {
