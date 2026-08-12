@@ -6,7 +6,7 @@ pipeline {
     }
   }
   environment {
-    DOCKER_IMAGE   = "dockernavaneeth/spring-boot-app/:${BUILD_NUMBER}"
+    DOCKER_IMAGE   = "dockernavaneeth/spring-boot-app"
     GIT_REPO_NAME  = "java-maven-sonar-argocd"
     GIT_USER_NAME  = "Navaneethkrishna-coder"
     APP_DIR        = "java-maven-sonar-argocd-helm-k8s/spring-boot-app"
@@ -34,7 +34,7 @@ pipeline {
         withSonarQubeEnv('sonarqube') {
             sh '''
                 cd spring-boot-app
-                mvn sonar:sonar \
+                mvn org.sonarsource.scanner.maven:sonar-maven-plugin:5.1.0.4751:sonar \
                   -Dsonar.projectKey=my-ec2-project \
                   -Dsonar.projectName="Spring Boot App" \
                   -Dsonar.host.url=$SONAR_HOST_URL
